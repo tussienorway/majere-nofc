@@ -1,0 +1,6 @@
+# The chat template embedded in the GGUF fails to parse in Ollama 0.40.2's llama-server
+# ("Parser Error: Expected }} (Got eq)"). This uses LTG's official Go template from the HF repo.
+FROM hf.co/ltg/normistral-11b-thinking-gguf:Q4_K_M
+TEMPLATE """{{- if .System }}<system_prompt>{{- if eq (slice .System 0 1) " " }}{{ .System }}{{- else }} {{ .System }}{{- end }}</system_prompt>{{- end }}{{- range .Messages }}{{- if eq .Role "user" }}<instruction> {{ .Content }}</instruction>{{- else if eq .Role "assistant" }}{{- if and .Content (eq (slice .Content 0 1) " ") }}{{ .Content }}{{- else }} {{ .Content }}{{- end }}</s>{{- end }}{{- end }}"""
+PARAMETER num_ctx 8192
+PARAMETER repeat_penalty 1.0

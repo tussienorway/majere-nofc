@@ -38,7 +38,7 @@ def main():
     bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                              bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
     model = AutoModelForCausalLM.from_pretrained(name, quantization_config=bnb, device_map={"": 0},
-                                                 torch_dtype=torch.bfloat16, attn_implementation="sdpa")
+                                                 dtype=torch.bfloat16, attn_implementation="sdpa")
     model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
     lora = LoraConfig(r=a.rank, lora_alpha=2 * a.rank, lora_dropout=0.05, task_type="CAUSAL_LM",
                       target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"])
@@ -57,9 +57,11 @@ def main():
     tr.save_model(out)
     steps = tr.state.global_step; total_steps = tr.state.max_steps or steps
     tokens_seen = n_tokens * (steps / total_steps) * a.epochs if total_steps else n_tokens
-    m = {"base": name, "gpu": torch.cuda.get_device_name(0), "examples": len(ds), "dataset_tokens": n_tokens,
+    m = {"base": name, "torch": torch.__version__, "cuda": torch.version.cuda, "gpu": torch.cuda.get_device_name(0), "examples": len(ds), "dataset_tokens": n_tokens,
          "steps": steps, "wall_seconds": round(wall, 1), "approx_tokens_per_second": round(tokens_seen / wall, 1),
-         "peak_vram_gib": round(torch.cuda.max_memory_allocated() / 2**30, 2), "max_len": a.max_len, "rank": a.rank}
+         "peak_vram_gib": round(torch.cuda.max_memory_allocated() / 2**30, 2), "max_len": a.max_len, "rank": a.rank, "grad_accum": a.grad_accum,
+         "seconds_per_step": round(wall / max(steps, 1), 2),
+         "tokens_per_step_est": round(tokens_seen / max(steps, 1), 1)}
     json.dump(m, open(f"{out}/pilot_metrics.json", "w"), indent=2)
     print(json.dumps(m, indent=2))
 
