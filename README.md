@@ -8,7 +8,7 @@ NO-FC measures whether a language model can use tools correctly when the user wr
 - **not** calling a tool when none is needed
 - **asking a follow-up question** when required information is missing
 
-**Status:** seed set v0 has 40 hand-written tasks (20 Bokmål, 20 Nynorsk): 24 tool calls, 8 no-call, 8 clarify. **No model results have been published yet.**
+**Status:** v1 (120 tasks, 80 dev / 40 held-out test, `data/nofc_v1.jsonl`) and seed set v0 has 40 hand-written tasks (20 Bokmål, 20 Nynorsk): 24 tool calls, 8 no-call, 8 clarify. **No model results have been published yet.**
 
 ## Run against your own model (Ollama / llama.cpp / vLLM)
 No dependencies beyond Python 3.10+.

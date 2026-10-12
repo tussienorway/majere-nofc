@@ -1,9 +1,208 @@
 [
- {"name":"get_weather","description":"Hent værmelding for et sted","parameters":{"type":"object","properties":{"location":{"type":"string"},"date":{"type":"string","description":"ISO-dato YYYY-MM-DD"}},"required":["location"]}},
- {"name":"create_calendar_event","description":"Opprett en kalenderhendelse","parameters":{"type":"object","properties":{"title":{"type":"string"},"date":{"type":"string","description":"YYYY-MM-DD"},"time":{"type":"string","description":"HH:MM"},"duration_minutes":{"type":"integer"}},"required":["title","date","time"]}},
- {"name":"send_sms","description":"Send en SMS","parameters":{"type":"object","properties":{"to":{"type":"string","description":"Telefonnummer med landskode, f.eks. +4791234567"},"message":{"type":"string"}},"required":["to","message"]}},
- {"name":"search_bus_departures","description":"Finn bussavganger fra et stoppested","parameters":{"type":"object","properties":{"stop":{"type":"string"},"after_time":{"type":"string","description":"HH:MM"},"line":{"type":"string"}},"required":["stop"]}},
- {"name":"convert_currency","description":"Konverter valuta","parameters":{"type":"object","properties":{"amount":{"type":"number"},"from_currency":{"type":"string","description":"ISO 4217"},"to_currency":{"type":"string","description":"ISO 4217"}},"required":["amount","from_currency","to_currency"]}},
- {"name":"set_reminder","description":"Sett en påminnelse","parameters":{"type":"object","properties":{"text":{"type":"string"},"datetime":{"type":"string","description":"YYYY-MM-DDTHH:MM"}},"required":["text","datetime"]}},
- {"name":"lookup_company","description":"Slå opp et foretak i Enhetsregisteret","parameters":{"type":"object","properties":{"org_number":{"type":"string","description":"9 siffer"},"name":{"type":"string"}},"required":[]}}
+ {
+  "name": "get_weather",
+  "description": "Hent værmelding for et sted",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "location": {
+     "type": "string"
+    },
+    "date": {
+     "type": "string",
+     "description": "ISO-dato YYYY-MM-DD"
+    }
+   },
+   "required": [
+    "location"
+   ]
+  }
+ },
+ {
+  "name": "create_calendar_event",
+  "description": "Opprett en kalenderhendelse",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "date": {
+     "type": "string",
+     "description": "YYYY-MM-DD"
+    },
+    "time": {
+     "type": "string",
+     "description": "HH:MM"
+    },
+    "duration_minutes": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "title",
+    "date",
+    "time"
+   ]
+  }
+ },
+ {
+  "name": "send_sms",
+  "description": "Send en SMS",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "to": {
+     "type": "string",
+     "description": "Telefonnummer med landskode, f.eks. +4791234567"
+    },
+    "message": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "to",
+    "message"
+   ]
+  }
+ },
+ {
+  "name": "search_bus_departures",
+  "description": "Finn bussavganger fra et stoppested",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "stop": {
+     "type": "string"
+    },
+    "after_time": {
+     "type": "string",
+     "description": "HH:MM"
+    },
+    "line": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "stop"
+   ]
+  }
+ },
+ {
+  "name": "convert_currency",
+  "description": "Konverter valuta",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "amount": {
+     "type": "number"
+    },
+    "from_currency": {
+     "type": "string",
+     "description": "ISO 4217"
+    },
+    "to_currency": {
+     "type": "string",
+     "description": "ISO 4217"
+    }
+   },
+   "required": [
+    "amount",
+    "from_currency",
+    "to_currency"
+   ]
+  }
+ },
+ {
+  "name": "set_reminder",
+  "description": "Sett en påminnelse",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string"
+    },
+    "datetime": {
+     "type": "string",
+     "description": "YYYY-MM-DDTHH:MM"
+    }
+   },
+   "required": [
+    "text",
+    "datetime"
+   ]
+  }
+ },
+ {
+  "name": "lookup_company",
+  "description": "Slå opp et foretak i Enhetsregisteret",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "org_number": {
+     "type": "string",
+     "description": "9 siffer"
+    },
+    "name": {
+     "type": "string"
+    }
+   },
+   "required": []
+  }
+ },
+ {
+  "name": "book_table",
+  "description": "Bestill bord på restaurant",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "restaurant": {
+     "type": "string"
+    },
+    "date": {
+     "type": "string",
+     "description": "YYYY-MM-DD"
+    },
+    "time": {
+     "type": "string",
+     "description": "HH:MM"
+    },
+    "people": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "restaurant",
+    "date",
+    "time",
+    "people"
+   ]
+  }
+ },
+ {
+  "name": "translate_text",
+  "description": "Oversett tekst",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string"
+    },
+    "target_language": {
+     "type": "string",
+     "enum": [
+      "nb",
+      "nn",
+      "en",
+      "sv",
+      "de"
+     ]
+    }
+   },
+   "required": [
+    "text",
+    "target_language"
+   ]
+  }
+ }
 ]

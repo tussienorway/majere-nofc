@@ -1,5 +1,7 @@
 __pycache__/
 runs/
+.venv/
 *.jsonl
 !data/*.jsonl
-.venv/
+!results/**/*.jsonl
+pilot_mix.jsonl

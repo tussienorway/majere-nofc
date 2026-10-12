@@ -1,7 +1,9 @@
 import json, os
 from nofc.score import score_task, summarize, arg_match
 H = os.path.dirname(os.path.dirname(__file__))
-TASKS = [json.loads(l) for l in open(os.path.join(H, "data", "seed_v0.jsonl"), encoding="utf-8")]
+def _load(n): return [json.loads(l) for l in open(os.path.join(H, "data", n), encoding="utf-8")]
+TASKS = _load("seed_v0.jsonl")
+V1 = _load("nofc_v1.jsonl")
 TOOLS = {t["name"]: t for t in json.load(open(os.path.join(H, "data", "tools.json"), encoding="utf-8"))}
 
 def test_dataset_valid():
@@ -35,3 +37,19 @@ def test_normalisation():
 def test_wrong_call_on_no_call_task():
     t = next(x for x in TASKS if x["expected"]["type"] == "no_call")
     assert not score_task(t, [{"name": "get_weather", "arguments": {}}], "")["correct"]
+
+def test_v1_valid_and_split():
+    assert len(V1) == 120 and len({t["id"] for t in V1}) == 120
+    assert sum(t["split"] == "test" for t in V1) == 40
+    for t in V1:
+        assert all(n in TOOLS for n in t["tools"])
+        e = t["expected"]
+        if e["type"] == "call":
+            c = e["calls"][0]; assert c["name"] in t["tools"]
+            assert set(c["arguments"]) <= set(TOOLS[c["name"]]["parameters"]["properties"])
+
+def test_prompt_mode_parse():
+    from nofc.evaluate import parse_prompt
+    resp = {"choices":[{"message":{"content":'<think>hmm</think><tool_call>{"name":"get_weather","arguments":{"location":"Bergen"}}</tool_call>'}}]}
+    calls, text = parse_prompt(resp)
+    assert calls == [{"name":"get_weather","arguments":{"location":"Bergen"}}] and text == ""
