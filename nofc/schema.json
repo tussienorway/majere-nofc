@@ -1,0 +1,7 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"NO-FC task","type":"object",
+ "required":["id","variant","reference_datetime","user","tools","expected"],
+ "properties":{"id":{"type":"string"},"variant":{"enum":["nb","nn"]},"reference_datetime":{"type":"string"},
+  "user":{"type":"string"},"tools":{"type":"array","items":{"type":"string"},"minItems":1},
+  "expected":{"oneOf":[
+   {"type":"object","required":["type","calls"],"properties":{"type":{"const":"call"},"calls":{"type":"array","minItems":1,"items":{"type":"object","required":["name","arguments"]}}}},
+   {"type":"object","required":["type"],"properties":{"type":{"enum":["no_call","clarify"]}}}]}}}
