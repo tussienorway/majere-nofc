@@ -1,0 +1,34 @@
+{
+  "all": {
+    "n": 120,
+    "exact_match": 0.725,
+    "call_name_acc": 0.8333333333333334,
+    "call_arg_acc": 0.7210648148148148,
+    "no_call_acc": 1.0,
+    "clarify_acc": 0.875
+  },
+  "nb": {
+    "n": 60,
+    "exact_match": 0.7333333333333333,
+    "call_name_acc": 0.8055555555555556,
+    "call_arg_acc": 0.7222222222222222,
+    "no_call_acc": 1.0,
+    "clarify_acc": 0.8333333333333334
+  },
+  "nn": {
+    "n": 60,
+    "exact_match": 0.7166666666666667,
+    "call_name_acc": 0.8611111111111112,
+    "call_arg_acc": 0.7199074074074074,
+    "no_call_acc": 1.0,
+    "clarify_acc": 0.9166666666666666
+  },
+  "model": "qwen3:8b",
+  "tool_mode": "native",
+  "no_think": false,
+  "tasks": "nofc_v1.jsonl",
+  "split": null,
+  "errors": 1,
+  "wall_seconds": 1023.9,
+  "date": "2026-10-13"
+}

@@ -1,4 +1,4 @@
-"""QLoRA SFT pilot sized for one 16 GB GPU (e.g. RTX 5060 Ti 16 GB).
+﻿"""QLoRA SFT pilot sized for one 16 GB GPU (e.g. RTX 5060 Ti 16 GB).
 
   python train/qlora_sft.py --base qwen3-8b       --data pilot_mix.jsonl
   python train/qlora_sft.py --base normistral-7b  --data pilot_mix.jsonl
@@ -47,7 +47,7 @@ def main():
 
     cfg = SFTConfig(output_dir=out, num_train_epochs=a.epochs, max_steps=a.max_steps,
                     per_device_train_batch_size=1, gradient_accumulation_steps=a.grad_accum,
-                    learning_rate=a.lr, lr_scheduler_type="cosine", warmup_ratio=0.03,
+                    learning_rate=a.lr, lr_scheduler_type="cosine", warmup_steps=5,
                     optim="paged_adamw_8bit", bf16=True, gradient_checkpointing=True,
                     logging_steps=10, save_strategy="epoch", seed=a.seed, report_to="none",
                     dataset_text_field="text", max_length=a.max_len)

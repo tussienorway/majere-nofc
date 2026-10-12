@@ -1,0 +1,34 @@
+{
+  "all": {
+    "n": 120,
+    "exact_match": 0.3,
+    "call_name_acc": 0.1111111111111111,
+    "call_arg_acc": 0.09722222222222222,
+    "no_call_acc": 1.0,
+    "clarify_acc": 0.25
+  },
+  "nb": {
+    "n": 60,
+    "exact_match": 0.2833333333333333,
+    "call_name_acc": 0.08333333333333333,
+    "call_arg_acc": 0.06944444444444445,
+    "no_call_acc": 1.0,
+    "clarify_acc": 0.25
+  },
+  "nn": {
+    "n": 60,
+    "exact_match": 0.31666666666666665,
+    "call_name_acc": 0.1388888888888889,
+    "call_arg_acc": 0.125,
+    "no_call_acc": 1.0,
+    "clarify_acc": 0.25
+  },
+  "model": "normistral-11b-thinking-q4",
+  "tool_mode": "prompt",
+  "no_think": false,
+  "tasks": "nofc_v1.jsonl",
+  "split": null,
+  "errors": 0,
+  "wall_seconds": 835.6,
+  "date": "2026-10-13"
+}

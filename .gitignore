@@ -5,3 +5,7 @@ runs/
 !data/*.jsonl
 !results/**/*.jsonl
 pilot_mix.jsonl
+runs/
+smoke.log
+smoke.err
+results/probe.jsonl
