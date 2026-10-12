@@ -1,0 +1,2 @@
+{"model":"hf.co/ltg/normistral-11b-thinking-gguf:Q4_K_M (Ollama)","date":"2026-10-12","status":"not_scored",
+ "reason":"Ollama reports only the 'completion' capability for this GGUF (no 'tools'); every /v1/chat/completions request with tools returns an error. Native tool calling is not supported, so no score is reported. A prompt-based tool mode would be needed for a fair comparison (TODO)."}
