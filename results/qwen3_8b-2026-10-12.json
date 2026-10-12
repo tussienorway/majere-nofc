@@ -1,0 +1,30 @@
+{
+  "all": {
+    "n": 40,
+    "exact_match": 0.825,
+    "call_name_acc": 0.9166666666666666,
+    "call_arg_acc": 0.8194444444444445,
+    "no_call_acc": 1.0,
+    "clarify_acc": 1.0
+  },
+  "nb": {
+    "n": 20,
+    "exact_match": 0.85,
+    "call_name_acc": 0.9166666666666666,
+    "call_arg_acc": 0.8472222222222222,
+    "no_call_acc": 1.0,
+    "clarify_acc": 1.0
+  },
+  "nn": {
+    "n": 20,
+    "exact_match": 0.8,
+    "call_name_acc": 0.9166666666666666,
+    "call_arg_acc": 0.7916666666666666,
+    "no_call_acc": 1.0,
+    "clarify_acc": 1.0
+  },
+  "model": "qwen3:8b (Ollama Q4_K_M, default thinking, temperature 0)",
+  "date": "2026-10-12",
+  "hardware": "RTX 5060 Ti 16GB",
+  "wall_seconds": 547
+}
