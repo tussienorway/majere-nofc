@@ -1,0 +1,17 @@
+{
+  "base": "Qwen/Qwen3-8B",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "examples": 800,
+  "dataset_tokens": 249889,
+  "steps": 50,
+  "wall_seconds": 763.8,
+  "approx_tokens_per_second": 327.2,
+  "peak_vram_gib": 9.41,
+  "max_len": 1024,
+  "rank": 16,
+  "grad_accum": 16,
+  "seconds_per_step": 15.28,
+  "tokens_per_step_est": 4997.8
+}
