@@ -8,13 +8,19 @@ NO-FC measures whether a language model can use tools correctly when the user wr
 - **not** calling a tool when none is needed
 - **asking a follow-up question** when required information is missing
 
-**Status:** v1 (120 tasks, 80 dev / 40 held-out test, `data/nofc_v1.jsonl`) and seed set v0 has 40 hand-written tasks (20 Bokmål, 20 Nynorsk): 24 tool calls, 8 no-call, 8 clarify. **No model results have been published yet.**
+**Status:** v1 has 120 tasks (80 dev / 40 held-out test) in `data/nofc_v1.jsonl`. Seed v0 is still 40 hand-written tasks (20 Bokmål, 20 Nynorsk): 24 tool calls, 8 no-call, 8 clarify. The published baseline covers v0 only: [qwen3:8b](results/README.md) scores 0.825 exact match (33/40). NorMistral-11B-thinking was not scored (no tool support in Ollama). There are no v1 scores yet, and the QLoRA pilot has not been run.
 
 ## Run against your own model (Ollama / llama.cpp / vLLM)
 No dependencies beyond Python 3.10+.
 ```bash
 ollama pull qwen3:8b
 python -m nofc.evaluate --base-url http://localhost:11434/v1 --model qwen3:8b
+# Qwen3 soft switch, append /no_think:
+python -m nofc.evaluate --model qwen3:8b --no-think
+# No native tools: schemas in the system prompt, parse <tool_call>:
+python -m nofc.evaluate --model <gguf> --tool-mode prompt
+# Held-out v1 test split (the default tasks file is data/seed_v0.jsonl):
+python -m nofc.evaluate --model qwen3:8b --tasks data/nofc_v1.jsonl --split test
 # llama.cpp: llama-server -m model.gguf --jinja  → --base-url http://localhost:8080/v1
 ```
 The script prints a summary (all / nb / nn) and writes every answer to `nofc_results.jsonl`.
@@ -66,7 +72,7 @@ Note: the training text uses a simple, uniform `<|role|>` format with `<tool_cal
 - Base models: Qwen/Qwen3-8B (Apache-2.0), ltg/normistral-7b-warm (Apache-2.0)
 
 ## Roadmap
-1. Baseline: NO-FC v0 on untouched Qwen3-8B and NorMistral (via Ollama/llama.cpp)
+1. Baseline: v0 qwen3:8b is published (0.825 exact match; see [results/README.md](results/README.md)). Score NorMistral once Ollama supports tools, and publish v1 scores.
 2. QLoRA pilot and measured throughput
 3. Translate the function-calling data into Bokmål and Nynorsk, with validation
 4. NO-FC v1 (≥500 tasks, human-checked)
