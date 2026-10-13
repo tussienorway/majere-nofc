@@ -39,3 +39,7 @@ NorMistral-11B-thinking almost never produces a parseable tool call in prompt mo
 | 9.41 GiB | 15.3 s | ~327 | ~5.0k |
 
 At max_len 2048 the run hit CUDA OOM at step 25 while another llama.cpp server held ~5 GB of VRAM; 1024 fits with headroom. Estimate: ~330 tok/s means 1 epoch of the 250k-token pilot mix takes ~13 min, 10M tokens ~8.5 h, 100M tokens ~85 h on this card. Metrics: `v1/pilot_metrics_qwen3-8b_smoke-2026-10-13.json`.
+
+# Error analysis pointer
+
+All 7 test-split misses of qwen3:8b (thinking off, native tools) on v1 are date/time errors: relative weekdays resolved one or two days early, "halv"/"kvart" clock phrases, and asking for an optional duration or date instead of calling. The per-task breakdown, taken only from the files in `v1/`, is in [v1/error_analysis.md](v1/error_analysis.md). The diagnostic set `data/nofc_hard_temporal.jsonl` targets these failure modes; it has no baseline scores yet.
