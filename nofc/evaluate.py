@@ -47,8 +47,22 @@ def parse_native(resp):
              for tc in m.get("tool_calls") or []]
     return calls, THINK_RE.sub("", m.get("content") or "").strip()
 
+def tools_prompt(specs):
+    return PROMPT_TOOLS.format(tools=json.dumps([s["function"] for s in specs], ensure_ascii=False))
+
+def build_messages(task, specs, tool_mode, no_think=False):
+    d = datetime.fromisoformat(task["reference_datetime"])
+    system = SYSTEM.format(dt=task["reference_datetime"], wd=WEEKDAYS[d.weekday()])
+    if tool_mode == "prompt":
+        system += tools_prompt(specs)
+    if no_think: system += " /no_think"
+    return [{"role": "system", "content": system}, {"role": "user", "content": task["user"]}]
+
 def parse_prompt(resp):
-    text = THINK_RE.sub("", resp["choices"][0]["message"].get("content") or "").strip()
+    return parse_text(resp["choices"][0]["message"].get("content") or "")
+
+def parse_text(text):
+    text = THINK_RE.sub("", text).strip()
     calls = []
     for raw in CALL_RE.findall(text):
         try:
@@ -78,13 +92,8 @@ def main(argv=None):
     rows = []; t_start = time.time()
     with open(a.out, "w", encoding="utf-8") as out:
         for t in tasks:
-            d = datetime.fromisoformat(t["reference_datetime"])
             specs = tool_specs(t["tools"], a.tools)
-            system = SYSTEM.format(dt=t["reference_datetime"], wd=WEEKDAYS[d.weekday()])
-            if a.tool_mode == "prompt":
-                system += PROMPT_TOOLS.format(tools=json.dumps([s["function"] for s in specs], ensure_ascii=False))
-            if a.no_think: system += " /no_think"
-            msgs = [{"role": "system", "content": system}, {"role": "user", "content": t["user"]}]
+            msgs = build_messages(t, specs, a.tool_mode, a.no_think)
             t0 = time.time()
             try:
                 resp = chat(a.base_url, a.model, a.api_key, msgs, specs if a.tool_mode == "native" else None, a.timeout)

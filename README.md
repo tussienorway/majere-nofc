@@ -63,7 +63,36 @@ How it fits in 16 GB:
 
 If you run out of memory, lower `--max-len` to 1024. Each run writes `pilot_metrics.json` (tokens/s, peak VRAM, time). Those numbers replace the planning estimate on the project's compute page.
 
-Note: the training text uses a simple, uniform `<|role|>` format with `<tool_call>{json}</tool_call>` for both models. Before NO-FC can be run against a fine-tuned model, the server needs a matching chat template (TODO: add a template file plus GGUF export).
+### Checkpoints and resume
+By default one checkpoint is written per epoch (unchanged). For a multi-hour run, add intermediate checkpoints and resume after an interruption:
+```bash
+# --save-steps counts optimizer steps (one step = --grad-accum examples). Keeps the newest 2 checkpoints unless --save-total-limit says otherwise.
+python train/qlora_sft.py --base qwen3-8b --data pilot_mix.jsonl --save-steps 50
+# after a crash/reboot: same command plus --resume (newest checkpoint in --out; starts from step 0 if there is none yet)
+python train/qlora_sft.py --base qwen3-8b --data pilot_mix.jsonl --save-steps 50 --resume
+# or resume from an explicit checkpoint (or a run directory containing checkpoint-N folders)
+python train/qlora_sft.py --base qwen3-8b --data pilot_mix.jsonl --save-steps 50 --resume runs/qwen3-8b-r16-s0/checkpoint-150
+```
+Resume with the same `--data`, `--seed`, `--epochs`/`--max-steps` and other hyperparameters as the original run, and the same `--out` (the default `--out` already depends on `--base`, `--rank` and `--seed`). Only complete checkpoints (with `trainer_state.json`) are picked up. The `pilot_metrics.json` of a resumed run only covers the resumed part: `seconds_per_step` and tokens/s use `steps_this_run`, and `resumed_from` / `resumed_from_step` are added. Use an uninterrupted run for throughput numbers.
+
+### Serve the adapter and evaluate it on NO-FC
+The training text is not Qwen3's chat template, so Ollama/llama.cpp cannot serve the adapter as-is. `nofc/serve.py` is a small OpenAI-compatible server (`/v1/chat/completions`, `/v1/models`) that loads the base model in 4-bit NF4 exactly as in training (expected to fit 16 GB easily; actual VRAM not yet measured) plus the LoRA adapter with transformers and peft. It builds prompts with `nofc/chatfmt.py`, the same code `train/build_data.py` uses to write the training text, and decodes greedily (temperature is always 0; `<|end|>` is a stop string). It does not use any chat template.
+
+Two terminals, from the repo root (the evaluator itself needs no dependencies; the server needs the `train/requirements.txt` packages):
+```bash
+# terminal 1: the trained adapter (the directory written by qlora_sft.py)
+python -m nofc.serve --base qwen3-8b --adapter runs/qwen3-8b-r16-s0 --port 8000
+
+# terminal 2: v1 test split, both tool modes
+python -m nofc.evaluate --base-url http://127.0.0.1:8000/v1 --model qwen3-8b-adapter --tool-mode prompt --tasks data/nofc_v1.jsonl --split test --out adapter_prompt.jsonl
+python -m nofc.evaluate --base-url http://127.0.0.1:8000/v1 --model qwen3-8b-adapter --tool-mode native --tasks data/nofc_v1.jsonl --split test --out adapter_native.jsonl
+```
+- Do not pass `--no-think`: the training format has no `/no_think`, and appending it would make the prompt differ from training. The adapter never produces `<think>` blocks in this format.
+- `--tool-mode prompt` puts the schemas in the system prompt and parses `<tool_call>` from the text. `--tool-mode native` sends OpenAI `tools`; the server appends the schemas to the system prompt with the same text as prompt mode and converts the parsed `<tool_call>` into `tool_calls`. The two modes therefore give the model byte-identical prompts, so the generations, and therefore the scores, should be identical; a difference would point to a bug.
+- Control run: serve the same base without `--adapter` (`python -m nofc.serve --base qwen3-8b --port 8001`, model name `qwen3-8b-base`) and evaluate it the same way. This isolates the effect of the fine-tuning from the effect of the different prompt format.
+- The published baselines (qwen3:8b via Ollama, Q4_K_M, Qwen's own chat template and native tool handling) are not the same prompt path or quantisation as this server. The comparison with the control run above is the cleaner one; treat the Ollama numbers as context.
+- Generation is capped at 512 new tokens per answer (`max_tokens` in the request can lower it).
+- Not provided: merge + GGUF export for llama.cpp/Ollama. That would need a matching chat template and a separate check that its output agrees with this server.
 
 ## Data and licences
 - Code: Apache-2.0

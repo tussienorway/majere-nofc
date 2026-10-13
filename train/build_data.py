@@ -5,14 +5,10 @@ NB: glaive is English. The pilot uses it as-is to measure the baseline effect; t
 function-calling data is a separate later step (see README roadmap).
 Tool calls use the <tool_call>{json}</tool_call> convention (also Qwen3's native format).
 """
-import argparse, json, re, random
+import argparse, json, os, re, random, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datasets import load_dataset
-
-def fmt(system, turns):
-    s = f"<|system|>\n{system}\n" if system else ""
-    for role, text in turns:
-        s += f"<|{role}|>\n{text}\n"
-    return s + "<|end|>"
+from nofc.chatfmt import fmt, wrap_tool_call  # shared with nofc/serve.py so training and serving text cannot drift
 
 def alpaca(n, seed):
     ds = load_dataset("NbAiLab/norwegian-alpaca", split="train").shuffle(seed=seed).select(range(n))
@@ -34,7 +30,7 @@ def glaive(n, seed):
             m = re.match(r"<functioncall>\s*(\{.*\})\s*$", text, re.S)
             if m:
                 raw = m.group(1).replace("'{", "{").replace("}'", "}")
-                try: text = "<tool_call>" + json.dumps(json.loads(raw), ensure_ascii=False) + "</tool_call>"
+                try: text = wrap_tool_call(json.loads(raw))
                 except json.JSONDecodeError: turns = None; break
             turns.append((role, text))
         if turns: yield fmt(sysmsg, turns)
