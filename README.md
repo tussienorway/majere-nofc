@@ -10,6 +10,12 @@ NO-FC measures whether a language model can use tools correctly when the user wr
 
 **Status:** v1 has 120 tasks (80 dev / 40 held-out test) in `data/nofc_v1.jsonl`. Seed v0 is still 40 hand-written tasks (20 Bokmål, 20 Nynorsk): 24 tool calls, 8 no-call, 8 clarify. The published baseline covers v0 only: [qwen3:8b](results/README.md) scores 0.825 exact match (33/40). NorMistral-11B-thinking was not scored (no tool support in Ollama). There are no v1 scores yet, and the QLoRA pilot has not been run.
 
+## v1 is frozen; hard-temporal diagnostic set
+`data/nofc_v1.jsonl` and its 80/40 split will not change, so scores stay comparable. All 7 test misses of the published qwen3:8b baseline were date/time errors (relative weekdays, "halv"/"kvart" clock phrases, and asking for an optional duration or date instead of calling); see [results/v1/error_analysis.md](results/v1/error_analysis.md). `data/nofc_hard_temporal.jsonl` (48 tasks, 24 Bokmål / 24 Nynorsk, 32 dev / 16 test, built by `data/make_hard_temporal.py`) targets exactly those three failure modes with the same reference time (Monday 2026-10-12 10:00). It has no published scores yet. Clock conventions in the gold answers: "halv X" = (X-1):30, "kvart over X" = X:15, "kvart på X" = (X-1):45; a weekday name is its next occurrence after today ("mandag" = 2026-10-19). Run it with:
+```bash
+python -m nofc.evaluate --model qwen3:8b --tasks data/nofc_hard_temporal.jsonl --split test --out ht_test.jsonl
+```
+
 ## Run against your own model (Ollama / llama.cpp / vLLM)
 No dependencies beyond Python 3.10+.
 ```bash
@@ -21,6 +27,8 @@ python -m nofc.evaluate --model qwen3:8b --no-think
 python -m nofc.evaluate --model <gguf> --tool-mode prompt
 # Held-out v1 test split (the default tasks file is data/seed_v0.jsonl):
 python -m nofc.evaluate --model qwen3:8b --tasks data/nofc_v1.jsonl --split test
+# Hard-temporal diagnostic set (dev and test together, or add --split test):
+python -m nofc.evaluate --model qwen3:8b --tasks data/nofc_hard_temporal.jsonl
 # llama.cpp: llama-server -m model.gguf --jinja  → --base-url http://localhost:8080/v1
 ```
 The script prints a summary (all / nb / nn) and writes every answer to `nofc_results.jsonl`.
