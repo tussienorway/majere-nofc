@@ -8,7 +8,7 @@ NO-FC measures whether a language model can use tools correctly when the user wr
 - **not** calling a tool when none is needed
 - **asking a follow-up question** when required information is missing
 
-**Status:** v1 has 120 tasks (80 dev / 40 held-out test) in `data/nofc_v1.jsonl`. Seed v0 is still 40 hand-written tasks (20 Bokmål, 20 Nynorsk): 24 tool calls, 8 no-call, 8 clarify. The published baseline covers v0 only: [qwen3:8b](results/README.md) scores 0.825 exact match (33/40). NorMistral-11B-thinking was not scored (no tool support in Ollama). There are no v1 scores yet, and the QLoRA pilot has not been run.
+**Status:** v1 has 120 tasks (80 dev / 40 held-out test) in `data/nofc_v1.jsonl`; seed v0 is 40 hand-written tasks (20 Bokmål, 20 Nynorsk: 24 tool calls, 8 no-call, 8 clarify). Baselines exist for both: on v0, [qwen3:8b](results/README.md) scores 0.825 exact match (33/40); the v1 baselines (qwen3:8b in three configurations, NorMistral-11B-thinking in prompt mode) are tabulated in [results/README.md](results/README.md), with the qwen3:8b test-split misses analysed in [results/v1/error_analysis.md](results/v1/error_analysis.md). The hard-temporal diagnostic set (`data/nofc_hard_temporal.jsonl`) has no scores yet. Only a 50-step QLoRA smoke run has been done; the full QLoRA pilot has not been run.
 
 ## v1 is frozen; hard-temporal diagnostic set
 `data/nofc_v1.jsonl` and its 80/40 split will not change, so scores stay comparable. All 7 test misses of the published qwen3:8b baseline were date/time errors (relative weekdays, "halv"/"kvart" clock phrases, and asking for an optional duration or date instead of calling); see [results/v1/error_analysis.md](results/v1/error_analysis.md). `data/nofc_hard_temporal.jsonl` (48 tasks, 24 Bokmål / 24 Nynorsk, 32 dev / 16 test, built by `data/make_hard_temporal.py`) targets exactly those three failure modes with the same reference time (Monday 2026-10-12 10:00). It has no published scores yet. Clock conventions in the gold answers: "halv X" = (X-1):30, "kvart over X" = X:15, "kvart på X" = (X-1):45; a weekday name is its next occurrence after today ("mandag" = 2026-10-19). Run it with:
@@ -58,11 +58,13 @@ Known limitations of v0:
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cu128   # Blackwell needs CUDA 12.8+
 pip install -r train/requirements.txt
-python train/build_data.py --n-alpaca 4000 --n-glaive 4000 --out pilot_mix.jsonl
+python train/build_data.py --n-alpaca 4000 --n-glaive 4000 --n-no-temporal 300 --out pilot_mix.jsonl
 python train/qlora_sft.py --base qwen3-8b --data pilot_mix.jsonl --max-steps 50     # smoke run
 python train/qlora_sft.py --base qwen3-8b --data pilot_mix.jsonl                    # full pilot
 python train/qlora_sft.py --base normistral-7b --data pilot_mix.jsonl
 ```
+`--n-no-temporal N` (default 300; `0` disables) adds N procedurally generated Bokmål/Nynorsk function-calling dialogues from `train/make_no_temporal_fc.py` to the mix. They target the three failure modes in [results/v1/error_analysis.md](results/v1/error_analysis.md): (A) relative weekday / day offset resolved to the wrong date, (B) "halv X" / "kvart over X" / "kvart på X" clock phrases, and (C) over-clarifying when only optional arguments (`duration_minutes`, `after_time`, `line`) are missing. Clarify and no-call controls are included so the model does not learn to always call or always ask. Gold answers use the same reference time and conventions as the eval sets (Monday 2026-10-12 10:00; a weekday name is its next occurrence after today). The examples are disjoint from the eval sets: the generator rejects any user string that equals (after case-folding and removing punctuation) or closely overlaps a `user` in `seed_v0.jsonl`, `nofc_v1.jsonl` or `nofc_hard_temporal.jsonl`, and `tests/test_no_temporal_fc.py` checks this. Generation is offline (no `datasets` download); `--n-alpaca 0 --n-glaive 0` skips the Hugging Face sources. This is a focused injection for the pilot, not the full Norwegian function-calling translation on the roadmap.
+
 How it fits in 16 GB:
 - 4-bit NF4 with double quantisation
 - LoRA r=16 on all projections
